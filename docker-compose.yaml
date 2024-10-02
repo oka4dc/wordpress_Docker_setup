@@ -1,0 +1,36 @@
+version: '3.8'  # Define the Compose version
+
+services:
+  # MySQL Service
+  db:
+    image: mysql:5.7  # Using MySQL version 5.7
+    container_name: mysql_db
+    volumes:
+      - db_data:/var/lib/mysql  # Persistent volume to store database data
+    restart: always  # Always restart the container in case of failure
+    environment:
+      MYSQL_DATABASE: wordpress_db  # Define the database name
+      MYSQL_USER: wordpress_user    # Define the MySQL user
+      MYSQL_PASSWORD: wordpress_pass  # Define the MySQL user's password
+      MYSQL_ROOT_PASSWORD: root_pass  # Define the MySQL root password
+
+  # WordPress Service
+  wordpress:
+    image: wordpress:latest  # Pull the latest WordPress image
+    container_name: wordpress_app
+    depends_on:
+      - db  # Ensure that the db service is running before WordPress starts
+    ports:
+      - "8000:80"  # Map port 8000 on the host to port 80 on the container
+    volumes:
+      - ./wp_data:/var/www/html  # Persistent volume for WordPress files
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306  # Point to the MySQL service
+      WORDPRESS_DB_NAME: wordpress_db  # Database name (must match db service)
+      WORDPRESS_DB_USER: wordpress_user  # MySQL user (must match db service)
+      WORDPRESS_DB_PASSWORD: wordpress_pass  # MySQL user's password (must match db service)
+
+volumes:
+  db_data:  # Named volume for MySQL data
+  wp_data:  # Named volume for WordPress files
